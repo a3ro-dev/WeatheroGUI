@@ -18,48 +18,51 @@ class _WeatherPageState extends State<WeatherPage> {
   bool _weatherLoadSuccess = false;
   bool _isNight = false;
 
-  // Function to fetch the weather data.
+  static const int duskHour = 18;
+  static const int dawnHour = 6;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWeather();
+  }
+
   _fetchWeather() async {
-    // Get the current city name.
-    String cityName = await _weatherService.getCurrentCity();
-
-    // Check if the city is recognized as "Prayagraj" by the weather service.
-    if (cityName.toLowerCase() == "prayagraj") {
-      // If recognized as "Prayagraj," use the known alternative name "Allahabad."
-      cityName = "Allahabad";
-    }
-
     try {
-      // Fetch the weather data for the current city.
-      final weather = await _weatherService.getWeather(cityName);
+      String cityName = await _weatherService.getCurrentCity();
 
-      // Determine if it's night based on current time (assuming dusk and dawn times).
-      DateTime now = DateTime.now();
-      int hour = now.hour;
+      if (cityName.toLowerCase() == "prayagraj") {
+        cityName = "Allahabad";
+      }
+
+      final weather = await _weatherService.getWeather(cityName);
 
       setState(() {
         _weather = weather;
-        _weatherLoadSuccess = true; // Weather data loaded successfully
-        _isNight = (hour >= 18 || hour < 6); // Assuming dusk at 6 PM and dawn at 6 AM
+        _weatherLoadSuccess = true;
+        _isNight = _isNightTime();
       });
     } catch (e) {
-      // Handle any exceptions that might occur during the fetching process.
-      print('Error fetching weather data: $e');
+      showErrorSnackBar("Error fetching weather data");
       setState(() {
-        _weatherLoadSuccess = false; // Loading failed
+        _weatherLoadSuccess = false;
       });
     } finally {
       setState(() {
-        _loading = false; // Loading is done
+        _loading = false;
       });
     }
   }
 
-  // Weather animations
-  String getWeatherAnimation(String? mainCondition) {
-    if (mainCondition == null) return 'animation-icons/sunny.json'; // Default to sunny
+  bool _isNightTime() {
+    int hour = DateTime.now().hour;
+    return hour >= duskHour || hour < dawnHour;
+  }
 
-    String timeOfDay = _isNight ? 'night-' : ''; // Prefix for night animations
+  String getWeatherAnimation(String? mainCondition) {
+    if (mainCondition == null) return 'animation-icons/sunny.json';
+
+    String timeOfDay = _isNight ? 'night-' : '';
 
     switch (mainCondition.toLowerCase()) {
       case 'clouds':
@@ -82,10 +85,14 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchWeather();
+  void showErrorSnackBar(String message) {
+    // Show a snackbar with the error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -160,7 +167,7 @@ class _WeatherPageState extends State<WeatherPage> {
       height: 24,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.red, // Use your desired color for the error indicator
+        color: Colors.red,
       ),
     );
   }

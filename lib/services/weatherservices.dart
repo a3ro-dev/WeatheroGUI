@@ -5,53 +5,71 @@ import 'package:http/http.dart' as http;
 import 'package:weatherapp/models/weathermodel.dart';
 
 class WeatherService {
- // Constant for the base URL of the weather API.
- static const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather';
+  static const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather';
 
- // API key for accessing the weather API.
- final String apikey;
+  final String apiKey;
 
- // Constructor to initialize the API key.
- WeatherService(this.apikey);
+  WeatherService(this.apiKey);
 
- // Method to fetch the weather data for a given city.
- Future<Weather> getWeather(String cityName) async {
-  try {
-    final response = await http
-        .get(Uri.parse('$BASE_URL?q=$cityName&appid=$apikey&units=metric'));
+  Future<Weather> getWeather(String cityName) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=metric'));
 
-    if (response.statusCode == 200) {
-      return Weather.fromJson(jsonDecode(response.body));
-    } else {
-      print('Failed to load weather. Status code: ${response.statusCode}, Body: ${response.body}');
-      throw Exception('Failed to load weather');
+      if (response.statusCode == 200) {
+        return Weather.fromJson(jsonDecode(response.body));
+      } else {
+        print(
+            'Failed to load weather. Status code: ${response.statusCode}, Body: ${response.body}');
+        throw WeatherApiException(
+            'Failed to load weather. HTTP Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching weather data: $e');
+      throw WeatherApiException('Failed to load weather. $e');
     }
-  } catch (e) {
-    print('Error fetching weather data: $e');
-    throw Exception('Failed to load weather');
+  }
+
+  Future<String> getCurrentCity() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+
+      String? city = placemarks.isNotEmpty ? placemarks.first.locality : null;
+      if (city != null) {
+        return city;
+      } else {
+        throw LocationException(
+            'Unable to determine the city from the current location.');
+      }
+    } catch (e) {
+      print('Error getting current city: $e');
+      throw LocationException('Failed to get current city. $e');
+    }
   }
 }
 
+class WeatherApiException implements Exception {
+  final String message;
 
- // Method to fetch the current city using the device's location.
- Future<String> getCurrentCity() async {
-    // Check and request location permissions if necessary.
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
+  WeatherApiException(this.message);
 
-    // Get the current device location.
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+  @override
+  String toString() => 'WeatherApiException: $message';
+}
 
-    // Get the details of the current location, such as the city name.
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+class LocationException implements Exception {
+  final String message;
 
-    // Extract the city name from the location details.
-    String? city = placemarks[0].locality;
+  LocationException(this.message);
 
-    // Return the city name.
-    return city!;
- }
+  @override
+  String toString() => 'LocationException: $message';
 }

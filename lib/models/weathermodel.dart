@@ -1,41 +1,47 @@
 import 'dart:convert';
 
-/// Weather model class that encapsulates cityName, temperature, and mainCondition
 class Weather {
- // Name of the city
- final String cityName;
+  final String cityName;
+  final double temperature;
+  final String mainCondition;
 
- // Temperature of the city in degrees Celsius
- final double temperature;
-
- // Main condition of the weather
- final String mainCondition;
-
- // Constructor for Weather model
- Weather({
+  Weather({
     required this.cityName,
     required this.mainCondition,
     required this.temperature,
- });
+  });
 
- // Factory constructor for creating a Weather object from JSON data
- factory Weather.fromJson(Map<String, dynamic> json) {
+  factory Weather.fromJson(Map<String, dynamic> json) {
+    try {
+      return Weather(
+        cityName: json['name'],
+        temperature: (json['main']['temp'].toDouble()).roundToDouble(),
+        mainCondition: json['weather'][0]['main'],
+      );
+    } catch (e) {
+      // Handle parsing errors, e.g., log the error or throw a custom exception.
+      throw FormatException("Error parsing Weather JSON: $e");
+    }
+  }
+
+  // Named constructor for creating a Weather object from a JSON map
+  factory Weather.fromMap(Map<String, dynamic> map) {
     return Weather(
-      cityName: json['name'],
-      temperature: (json['main']['temp'].toDouble()).roundToDouble(),
-      mainCondition: json['weather'][0]['main'],
+      cityName: map['cityName'],
+      temperature: map['temperature'],
+      mainCondition: map['mainCondition'],
     );
- }
+  }
 
- // Converts a Weather object to a JSON string
- String toJson() => json.encode(toJsonMap());
+  // Converts a Weather object to a JSON string
+  String toJson() => json.encode(toJsonMap());
 
- // Converts a Weather object to a JSON map
- Map<String, dynamic> toJsonMap() {
+  // Converts a Weather object to a JSON map
+  Map<String, dynamic> toJsonMap() {
     return {
       'cityName': cityName,
       'temperature': temperature,
       'mainCondition': mainCondition,
     };
- }
+  }
 }
