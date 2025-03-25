@@ -1,0 +1,2 @@
+/home/akshatkushwaha/DevDrive/weatherapp/android/app/.cxx/RelWithDebInfo/56x5w1d6/x86_64/CMakeFiles/edit_cache.dir
+/home/akshatkushwaha/DevDrive/weatherapp/android/app/.cxx/RelWithDebInfo/56x5w1d6/x86_64/CMakeFiles/rebuild_cache.dir

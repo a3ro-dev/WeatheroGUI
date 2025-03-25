@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/akshatkushwaha/DevDrive/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/akshatkushwaha/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/akshatkushwaha/DevDrive/weatherapp/android/app/.cxx/RelWithDebInfo/56x5w1d6/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/akshatkushwaha/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/akshatkushwaha/DevDrive/weatherapp/android/app/.cxx/RelWithDebInfo/56x5w1d6/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
